@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Golang API Vuejs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+</head>
+<body>
+    <div class="container" id="app">
+        <h3 style="text-align: center">SIMPLE CRUD API GOLANG VUEJS</h3>
+        <br>
+            <form id="form">
+                <div class="form-group">
+                    <label >Nama</label>
+                    <input type="text" class="form-control" placeholder="Nama" v-model="input.Nama" required>
+                </div>
+                <div class="form-group">
+                    <label >Email</label>
+                    <input type="Email" class="form-control" placeholder="Email" v-model="input.Email" required>
+                </div>
+                <div class="form-group">
+                    <label >Password</label>
+                    <input type="Password" class="form-control" placeholder="Password" v-model="input.Password" required>
+                </div>
+            </form>
+            <div v-show ="editMode">
+                <button class="btn btn-primary" @click="EditData">Submit</button>
+                <button class="btn btn-success" @click="CancelEdit">Cancel</button>
+            </div>
+            <div v-show ="!editMode">
+                <button class="btn btn-primary" @click="InputData">Submit</button>
+            </div>
+            
+        <br><hr><br>
+        <Input type="text" class="form-control" placeholder="Search Nama" v-model="search" @change="SearchByName"></Input><br>
+        <table class="table">
+                <thead class="thead-light">
+                  <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Nama</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(data, index) in datas">
+                    <th scope="row">{{data.ID}}</th>
+                    <td>{{data.Nama}}</td>
+                    <td>{{data.Email}}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" @click="EditButton(index)">Edit</button>
+                        <button type="button" class="btn btn-danger" @click="DeleteData(data.ID)">Delete</button>                            
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+    </div>
+
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+          el: '#app',
+          data(){
+        return{
+              datas:[],
+              search:'',
+              input:{
+                Nama:'',
+                Email:'',
+                Password:'',
+              },
+
+              editMode:false
+            }
+        },
+            created: function() {
+                this.SearchByName()
+            },
+            methods: {
+                SearchByName: function(){
+                    if (this.search != '') {
+                        axios.get('http://localhost:1111/data/'+this.search)
+                        .then((response) => {
+                            this.datas = response.data;
+                            console.log(this.search);
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+                    }
+                    else{
+                        axios.get('http://localhost:1111/datas')
+                        .then((response) => {
+                            this.datas = response.data;
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+                    }
+                },
+
+                InputData(){
+                    axios.post('http://localhost:1111/adddata/'+this.input.Nama+"/"+this.input.Email+"/"+this.input.Password)
+                    .then((response) => {
+                        this.SearchByName()
+                        this.input= ''
+                        console.log("sukses add");
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+                },
+
+                DeleteData(id){
+                    axios.delete('http://localhost:1111/delete/'+id)
+                    .then((response) => {
+                        this.SearchByName()
+                        console.log("sukses delete"+id);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+                },
+
+                EditData(){
+                    axios.put('http://localhost:1111/editdata/'+this.input.ID+"/"+this.input.Nama+"/"+this.input.Email+"/"+this.input.Password)
+                    .then((response) => {
+                        this.SearchByName()
+                        this.input= ''
+                        console.log("sukses Edit");
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+                },
+
+                EditButton(index){
+                    this.input = this.datas[index]
+                    this.editMode = true
+                    console.log(this.input.Nama)
+                },
+
+                CancelEdit(){
+                    this.input= ''
+                    this.editMode = false
+                }
+            },
+            watch:{
+                search: function(){
+                    this.SearchByName();
+                }
+            }
+        })
+    </script>
+</body>
+</html>
