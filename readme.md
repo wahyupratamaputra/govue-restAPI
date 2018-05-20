@@ -1,10 +1,11 @@
 INSTALATION STEP
 first download golang library by typing in terminal or cmd 3 line below
 
-go get -u github.com/jinzhu/gorm
-go get github.com/gorilla/mux
-go get -u github.com/go-sql-driver/mysql
+- go get -u github.com/jinzhu/gorm
+- go get github.com/gorilla/mux
+- go get -u github.com/go-sql-driver/mysql
 
+-----------------
 
 - run the app by type on project directory "go run *.go" (if you non windows users)//// if windows user type "go build" then open the .exe file by double click on windows explorer
 
